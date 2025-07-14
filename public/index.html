@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Image Split & Zip</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background: #f6f8fa;
+        font-family: "Roboto", Arial, sans-serif;
+        min-height: 100vh;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      h1 {
+        color: #222;
+        margin-bottom: 24px;
+        font-weight: 700;
+      }
+      form {
+        background: #fff;
+        padding: 32px 24px 24px 24px;
+        border-radius: 12px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        min-width: 320px;
+        max-width: 90vw;
+      }
+      label {
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 6px;
+      }
+      input[type="file"] {
+        margin-bottom: 8px;
+      }
+      input[type="number"] {
+        width: 80px;
+        padding: 6px 8px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 1rem;
+      }
+      button {
+        background: #2563eb;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 12px 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s;
+        margin-top: 8px;
+      }
+      button:hover {
+        background: #1d4ed8;
+      }
+      .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      @media (max-width: 400px) {
+        form {
+          min-width: unset;
+          padding: 18px 6px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Image Split & Zip</h1>
+    <form id="uploadForm">
+      <div class="input-group">
+        <label for="image">Select image:</label>
+        <input type="file" id="image" name="image" accept="image/*" required />
+      </div>
+      <div class="input-group">
+        <label for="parts">Number of parts:</label>
+        <input
+          type="number"
+          id="parts"
+          name="parts"
+          min="2"
+          value="7"
+          required
+        />
+      </div>
+      <button type="submit">Upload & Download Zip</button>
+    </form>
+    <script>
+      document.getElementById("uploadForm").onsubmit = async function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const response = await fetch("/upload", {
+          method: "POST",
+          body: formData,
+        });
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "parts.zip";
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(url);
+        } else {
+          alert("Error uploading or processing image.");
+        }
+      };
+    </script>
+  </body>
+</html>
