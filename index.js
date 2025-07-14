@@ -3,9 +3,8 @@ const express = require("express");
 const multer = require("multer");
 const sharp = require("sharp");
 const archiver = require("archiver");
-const path = require("path");
 
-const app = express();
+export const app = express();
 const upload = multer();
 
 // Serve static files from public directory
@@ -46,6 +45,8 @@ app.post("/upload", upload.single("image"), async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () =>
-  console.log(`Server running on http://localhost:${PORT}`)
-);
+if (process.env.APP_ENV === "local") {
+  app.listen(PORT, () => {
+      console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}
