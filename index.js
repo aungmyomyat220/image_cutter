@@ -1,8 +1,10 @@
 // Express server for image upload, split, and zip download
-const express = require("express");
-const multer = require("multer");
-const sharp = require("sharp");
-const archiver = require("archiver");
+import express from "express";
+import multer from "multer";
+import sharp from "sharp";
+import archiver from "archiver";
+import dotenv from "dotenv";
+dotenv.config();
 
 export const app = express();
 const upload = multer();
@@ -16,6 +18,10 @@ app.post("/upload", upload.single("image"), async (req, res) => {
   // Get number of parts from form data, default to 7
   let parts = parseInt(req.body.parts, 10);
   if (isNaN(parts) || parts < 2) parts = 7;
+
+  // Get start number from form data, default to 1
+  let start = parseInt(req.body.start, 10);
+  if (isNaN(start) || start < 1) start = 1;
 
   try {
     const inputBuffer = req.file.buffer;
@@ -35,7 +41,9 @@ app.post("/upload", upload.single("image"), async (req, res) => {
       const buffer = await sharp(inputBuffer)
         .extract({ left: 0, top: i * cropHeight, width, height: cropHeight })
         .toBuffer();
-      archive.append(buffer, { name: `part_${i + 1}.jpg` });
+      // Zero-padded 3-digit filename, starting from 'start'
+      const fileNumber = (start + i).toString().padStart(3, "0");
+      archive.append(buffer, { name: `${fileNumber}.jpg` });
     }
 
     archive.finalize();
@@ -47,6 +55,6 @@ app.post("/upload", upload.single("image"), async (req, res) => {
 const PORT = process.env.PORT || 3000;
 if (process.env.APP_ENV === "local") {
   app.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Server is running on http://localhost:${PORT}`);
   });
 }
